@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"math"
 )
 
 type Point struct {
@@ -45,14 +46,34 @@ func generatePoints(s string) ([]Point, error) {
 
 // getArea gets the area inside from a given shape
 func getArea(points []Point) float64 {
-	// Your code goes here
-	return 0.0
+	// Your code goes here\
+	if len(points) < 3 {
+		return 0.0
+	}
+
+	area := 0.0
+
+	for i :=0;i< len(points)-1;i++{
+		area+= (points[i].X*points[i+1].Y - points[i].Y*points[i+1].X)
+	}
+	area+= (points[len(points)-1].X*points[0].Y - points[len(points)-1].Y*points[0].X)
+	area= math.Abs(area/2)
+	return area
 }
 
 // getPerimeter gets the perimeter from a given array of connected points
 func getPerimeter(points []Point) float64 {
 	// Your code goes here
-	return 0.0
+	if len(points) < 3 {
+		return 0.0
+	}
+
+	perim := 0.0
+	for i:=0;i<len(points)-1;i++{
+		perim += math.Sqrt(math.Abs(points[i].X - points[i+1].X)*math.Abs(points[i].X - points[i+1].X)+math.Abs(points[i].Y - points[i+1].Y)*math.Abs(points[i].Y - points[i+1].Y))
+	}
+	perim += math.Sqrt(math.Abs(points[0].X - points[len(points)-1].X)*math.Abs(points[0].X - points[len(points)-1].X)+math.Abs(points[0].Y - points[len(points)-1].Y)*math.Abs(points[0].Y - points[len(points)-1].Y))
+	return perim
 }
 
 // handler handles the web request and reponds it
@@ -81,10 +102,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Response construction
 	response := fmt.Sprintf("Welcome to the Remote Shapes Analyzer\n")
 	response += fmt.Sprintf(" - Your figure has : [%v] vertices\n", len(vertices))
-	response += fmt.Sprintf(" - Vertices        : %v\n", vertices)
-	response += fmt.Sprintf(" - Perimeter       : %v\n", perimeter)
-	response += fmt.Sprintf(" - Area            : %v\n", area)
 
+	if len(vertices) >= 3{
+		response += fmt.Sprintf(" - Vertices        : %v\n", vertices)
+		response += fmt.Sprintf(" - Perimeter       : %v\n", perimeter)
+		response += fmt.Sprintf(" - Area            : %v\n", area)
+	}
+	if len(vertices) < 3{
+		response += fmt.Sprintf("ERROR - Your shape is not compliying with the minimum number of vertices.\n")
+	}
+	
 	// Send response to client
 	fmt.Fprintf(w, response)
 }
