@@ -5,7 +5,6 @@ import(
 	"github.com/dgrijalva/jwt-go"
 	"time"
 	"strconv"
-	
 )
 
 type Session struct{
